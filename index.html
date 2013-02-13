@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Leap Motion NodeJS Simulator</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <script type="text/javascript" src="jquery1.8.3/jquery.min.js"></script>
+        <script type="text/javascript">
+            var ws = null;
+            $(document).ready(function() {
+                if ((typeof(WebSocket) === 'undefined') &&
+                        (typeof(MozWebSocket) !== 'undefined')) {
+                    WebSocket = MozWebSocket;
+                }
+                ws = new WebSocket("ws://localhost:8081/");
+                ws.onmessage = populateTable;
+            }); 
+            
+            $(".fileButton").live('click', function() {
+                //console.log($(this).data('file'));
+                if ($(this).attr('value') === "Start") {
+                    $(this).attr('value', "Stop");
+                    $(".fileButton").not(this).attr('disabled', true);
+                    startFile($(this).data('file'));
+                } else {
+                    $(this).attr('value', "Start");
+                    $(".fileButton").not(this).attr('disabled', false);
+                    stopFile();
+                }
+                return false;
+            });
+            
+            function populateTable(event){
+                var files = event.data.split("|");
+                    for (var i = 0; i < files.length; i++) {
+                        $('#fileTable').append(files[i]
+                                + '<input type="button" class="fileButton" id="'+i+'" value="Start" /><br />');
+                        $('#'+i).data('file', files[i]);
+                    }
+                ws.onmessage = showJSON;
+            }                
+
+            function startFile(fileName) {
+                log("Playing File: " + fileName);
+                ws.send(fileName);
+            }
+            
+            function stopFile() {
+                log("Playback cancelled by user");
+                ws.send("STOPJSON");
+            }
+
+            function showJSON(event) {
+                if (event.data === "EOF") {
+                    $(".fileButton").attr('value', 'Start');
+                    $(".fileButton").attr('disabled', false);
+                    log("Playback Complete");
+                } else {
+                    var obj = JSON.parse(event.data);
+                    var str = JSON.stringify(obj, undefined, 2);
+                    $('#json').html('<pre>' + str + '</pre>');                        
+                }
+            }      
+
+            function log(message) {
+                $("#status").html(message);
+            }                               
+        </script>
+        <style type="text/css">
+            #recordingList {
+                position: absolute;
+                right:10px;
+            }
+            #statusDisplay {
+                position: absolute;
+                right:5%;
+                top:10px;
+            }
+            #fileTable {
+                border: solid;
+            }
+            #status {
+                display:inline;
+            }
+        </style>
+    </head>
+    <body>
+        <h3>Leap Motion NodeJS JSON Simulator</h3>
+        <div id="recordingList">JSON Recordings<div id="fileTable"></div></div>
+        <div id="output"><p>JSON Output:</p><div id="json"></div></div>
+        <div id="statusDisplay"><b>Status:</b><p id="status"></p></div>    
+    </body>
+</html>
