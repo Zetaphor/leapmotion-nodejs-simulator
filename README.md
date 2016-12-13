@@ -21,6 +21,3 @@ Requires the following node packages:
 
 This software is licensed under the GPLv3 license.
 
-
-[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/Zetaphor/leapmotion-nodejs-simulator/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
-
