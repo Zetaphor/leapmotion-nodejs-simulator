@@ -17,6 +17,7 @@ wss.on('connection', function(ws) {
             playback = false;
         } else {
             fs = require('fs');
+            // This needs to be sanitized
             fs.readFile('leap_output/' + message, 'utf8', function(err, data) {
                 if (err) {
                     return console.log(err);
